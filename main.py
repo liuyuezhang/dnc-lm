@@ -1,7 +1,6 @@
 import argparse
 import time
 import math
-import numpy as np
 
 import torch
 import torch.nn as nn
@@ -12,9 +11,9 @@ import data
 parser = argparse.ArgumentParser(description='PyTorch Language Modeling')
 parser.add_argument('--data', type=str, default='penn',
                     help='data corpus (penn, wikitext-2, wikitext-103)')
-parser.add_argument('--model', type=str, default='LSTM',
+parser.add_argument('--model', type=str, default='DNC',
                     help='type of recurrent net (LSTM, Transformer, DNC)')
-parser.add_argument('--emsize', type=int, default=100,
+parser.add_argument('--emsize', type=int, default=50,
                     help='size of word embeddings')
 parser.add_argument('--nhid', type=int, default=200,
                     help='number of hidden units per layer')
@@ -101,10 +100,10 @@ elif args.model == 'Transformer':
     model = TransformerLM(ntokens, args.emsize, args.nhead, args.nhid, args.nlayers, args.dropout).to(device)
 elif args.model == 'DNC':
     from model.dnc_lm import DNCLM
-    model = DNCLM(ntokens, args.emsize, args.nhid, args.nlayers, args.dropout, args.tied).to(device)
+    model = DNCLM(ntoken=ntokens, ninp=args.emsize, nhid=args.nhid, nlayers=args.nlayers, dropout=args.dropout).to(device)
 
 criterion = nn.CrossEntropyLoss()
-print(sum(p.numel() for p in model.parameters()))
+print(args)
 
 
 ###############################################################################
@@ -124,6 +123,8 @@ def detach_hidden(h):
     elif isinstance(h, dict):
         for k, v in h.items():
             h[k] = detach_hidden(v)
+        return h
+    else:
         return h
 
 

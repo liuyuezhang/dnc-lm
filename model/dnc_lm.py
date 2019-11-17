@@ -5,7 +5,7 @@ import dnc
 class DNCLM(nn.Module):
     """Container module with an encoder, a recurrent module, and a decoder."""
 
-    def __init__(self, ntoken, ninp, nhid, nlayers, dropout=0.5, tie_weights=False):
+    def __init__(self, ntoken, ninp, nhid, nlayers, dropout=0.5):
         super(DNCLM, self).__init__()
         self.nhid = nhid
         self.nlayers = nlayers
@@ -23,18 +23,7 @@ class DNCLM(nn.Module):
                            batch_first=False,
                            gpu_id=0,
                            debug=False)
-        self.decoder = nn.Linear(nhid, ntoken)
-
-        # Optionally tie weights as in:
-        # "Using the Output Embedding to Improve Language Models" (Press & Wolf 2016)
-        # https://arxiv.org/abs/1608.05859
-        # and
-        # "Tying Word Vectors and Word Classifiers: A Loss Framework for Language Modeling" (Inan et al. 2016)
-        # https://arxiv.org/abs/1611.01462
-        if tie_weights:
-            if nhid != ninp:
-                raise ValueError('When using the tied flag, nhid must be equal to emsize')
-            self.decoder.weight = self.encoder.weight
+        self.decoder = nn.Linear(ninp, ntoken)
 
         self.init_weights()
 
